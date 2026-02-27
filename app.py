@@ -56,8 +56,20 @@ ESTADO_ICONE = {
 }
 
 def verificar_chave():
-    chave = request.headers.get("X-Api-Key") or request.args.get("key")
-    if not secrets.compare_digest(chave or "", API_KEY):
+    # Tenta os dois formatos de header (case-insensitive pelo Flask, mas garantindo)
+    chave = (
+        request.headers.get("X-Api-Key") or
+        request.headers.get("x-api-key") or
+        request.args.get("key") or
+        ""
+    ).strip()
+    chave_servidor = API_KEY.strip()
+    
+    # Log para debug (remover em produção)
+    import sys
+    print(f"[AUTH] recebida={repr(chave[:8])}... servidor={repr(chave_servidor[:8])}...", file=sys.stderr)
+    
+    if not chave or not secrets.compare_digest(chave, chave_servidor):
         abort(401)
 
 # ── Endpoints ─────────────────────────────────────────────────────────
