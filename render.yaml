@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sqlbackup-monitor
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: API_KEY
+        generateValue: true      # Render gera automaticamente uma chave segura
+      - key: DB_PATH
+        value: /var/data/monitor.db
+    disk:
+      name: monitor-data
+      mountPath: /var/data
+      sizeGB: 1                  # 1GB gratuito para o SQLite
